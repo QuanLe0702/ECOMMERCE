@@ -8,7 +8,7 @@ ENV REACT_APP_API_URI=$REACT_APP_API_URI
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . ./
 RUN npm run build
 
