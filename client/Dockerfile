@@ -1,5 +1,10 @@
 # Stage 1: Build a React application
 FROM node:18-alpine AS build
+
+# Chấp nhận biến môi trường API_URL khi build
+ARG REACT_APP_API_URI
+ENV REACT_APP_API_URI=$REACT_APP_API_URI
+
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./

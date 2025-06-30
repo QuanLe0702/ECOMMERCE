@@ -14,7 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Server sẽ chạy trên port được cung cấp bởi biến môi trường hoặc 8888
-EXPOSE 8888
+EXPOSE 5000 
 
 # Lấy giá trị PORT từ biến môi trường của nền tảng deploy
 ENV PORT=${PORT}
