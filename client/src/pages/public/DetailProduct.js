@@ -152,9 +152,14 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
             }).toString(),
           })
       })
+    const colorToSend = currentProduct.color || product?.color
+    if (!colorToSend) {
+      toast.error("Please select a color before adding to cart!")
+      return
+    }
     const response = await apiUpdateCart({
       pid,
-      color: currentProduct.color || product?.color,
+      color: colorToSend,
       quantity,
       price: currentProduct.price || product.price,
       thumbnail: currentProduct.thumb || product.thumb,
