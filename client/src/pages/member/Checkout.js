@@ -22,14 +22,14 @@ const Checkout = ({ dispatch, navigate }) => {
       )
       Swal.fire({
         icon: "info",
-        title: "Thanh toán",
-        text: `Vui lòng trả bằng tiền mặt số tiền ${formatMoney(
+        title: "Payment",
+        text: `Please pay in cash the amount of ${formatMoney(
           total
-        )} VNĐ khi nhận hàng.`,
+        )} VND upon delivery.`,
         showConfirmButton: true,
-        confirmButtonText: "Thanh toán",
+        confirmButtonText: "Pay",
         showCancelButton: true,
-        cancelButtonText: "Quay lại",
+        cancelButtonText: "Go back",
       }).then((result) => {
         if (result.isConfirmed) {
           handleSaveOrder()
@@ -58,6 +58,8 @@ const Checkout = ({ dispatch, navigate }) => {
       }, 1500)
     }
   }
+  const subtotal = currentCart?.reduce((sum, el) => +el?.price * el.quantity + sum, 0)
+  const amountUSD = Math.round(+subtotal / 23500)
   return (
     <div className="p-8 w-full grid grid-cols-10 h-full max-h-screen overflow-y-auto gap-6">
       {isSuccess && <Congrat />}
@@ -106,39 +108,39 @@ const Checkout = ({ dispatch, navigate }) => {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <span>Chọn phương thức thanh toán: </span>
+              <span>Select payment method: </span>
               <select
-                onChange={(e) => setPaymentMethod(e.target.value)}
+                onChange={(e) => {
+                  if (subtotal === 0) {
+                    Swal.fire('Error', 'Your cart is empty or the total amount is zero!', 'error')
+                    return
+                  }
+                  setPaymentMethod(e.target.value)
+                }}
                 value={paymentMethod}
                 className="border rounded-md px-4 py-3 flex-auto"
+                disabled={subtotal === 0}
               >
-                <option value="">Chọn</option>
-                <option value="OFFLINE">Thanh toán khi nhận hàng</option>
-                <option value="ONLINE">Thanh toán Paypal</option>
+                <option value="">Select</option>
+                <option value="OFFLINE">Cash on Delivery</option>
+                <option value="ONLINE">Pay with Paypal</option>
               </select>
             </div>
-            {paymentMethod === "ONLINE" && (
+            {paymentMethod === "ONLINE" && amountUSD > 0 && (
               <div className="w-full mx-auto">
                 <Paypal
                   payload={{
                     products: currentCart,
-                    total: Math.round(
-                      +currentCart?.reduce(
-                        (sum, el) => +el?.price * el.quantity + sum,
-                        0
-                      ) / 23500
-                    ),
+                    total: amountUSD,
                     address: current?.address,
                   }}
                   setIsSuccess={setIsSuccess}
-                  amount={Math.round(
-                    +currentCart?.reduce(
-                      (sum, el) => +el?.price * el.quantity + sum,
-                      0
-                    ) / 23500
-                  )}
+                  amount={amountUSD}
                 />
               </div>
+            )}
+            {paymentMethod === "ONLINE" && amountUSD === 0 && (
+              <div className="text-red-500 font-bold">Cannot pay with Paypal when the total amount is zero!</div>
             )}
           </div>
         </div>
