@@ -16,9 +16,7 @@ RUN npm run build
 FROM nginx:stable-alpine
 # Sao chép các file tĩnh đã được build từ giai đoạn trước vào thư mục public của Nginx
 COPY --from=build /app/build /usr/share/nginx/html
-
-# Sao chép cấu hình Nginx tùy chỉnh (nếu có)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80 để cho phép truy cập từ bên ngoài
 EXPOSE 80
