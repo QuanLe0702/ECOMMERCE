@@ -9,7 +9,7 @@ services:
     container_name: ecommerce_server
     # Không expose port ra ngoài host, Nginx sẽ truy cập qua mạng nội bộ của Docker
     expose:
-      - '8888'
+      - '5000'
     env_file:
       - ./server/.env # Bạn sẽ cần tạo file này trên EC2
     restart: unless-stopped
