@@ -4,11 +4,12 @@ import { roles, blockStatus } from 'ultils/contants'
 import moment from 'moment'
 import { InputField, Pagination, InputForm, Select, Button } from 'components'
 import useDebounce from 'hooks/useDebounce'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import Swal from 'sweetalert2'
 import clsx from 'clsx'
+import { FaSortAlphaDown, FaSortAlphaUp, FaSortNumericDown, FaSortNumericUp } from 'react-icons/fa'
 
 const ManageUser = () => {
     const { handleSubmit, register, formState: { errors }, reset } = useForm({
@@ -26,6 +27,10 @@ const ManageUser = () => {
     const [update, setUpdate] = useState(false)
     const [editElm, setEditElm] = useState(null)
     const [params] = useSearchParams()
+    const [sort, setSort] = useState({ key: 'createdAt', order: 'desc' })
+    const navigate = useNavigate()
+    const location = useLocation()
+
     const fetchUsers = async (params) => {
         const response = await apiGetUsers({ ...params, limit: process.env.REACT_APP_LIMIT })
         if (response.success) setUsers(response)
@@ -36,11 +41,35 @@ const ManageUser = () => {
     }, [update])
     const queriesDebounce = useDebounce(queries.q, 800)
 
+    const handleSort = (key, type) => {
+        setSort(prev => {
+            let newOrder = 'asc'
+            if (prev.key === key) {
+                newOrder = prev.order === 'asc' ? 'desc' : 'asc'
+            }
+            const searchParams = Object.fromEntries([...params])
+            let sortParam = key
+            if (newOrder === 'desc') sortParam = '-' + key
+            navigate({
+                pathname: location.pathname,
+                search: new URLSearchParams({ ...searchParams, sort: sortParam }).toString(),
+            })
+            return { key, order: newOrder }
+        })
+    }
+
     useEffect(() => {
-        const queries = Object.fromEntries([...params])
-        if (queriesDebounce) queries.q = queriesDebounce
-        fetchUsers(queries)
-    }, [queriesDebounce, params, update])
+        const searchParams = Object.fromEntries([...params])
+        if (queriesDebounce) searchParams.q = queriesDebounce
+        if (!searchParams.sort) {
+            navigate({
+                pathname: location.pathname,
+                search: new URLSearchParams({ ...searchParams, sort: '-createdAt' }).toString(),
+            })
+            return
+        }
+        fetchUsers(searchParams)
+    }, [queriesDebounce, params, update, navigate, location])
     const handleUpdate = async (data) => {
         const response = await apiUpdateUser(data, editElm._id)
         if (response.success) {
@@ -86,13 +115,76 @@ const ManageUser = () => {
                         <thead className='font-bold bg-gray-700 text-[13px] text-white'>
                             <tr className='border border-gray-500'>
                                 <th className='px-4 py-2'>#</th>
-                                <th className='px-4 py-2'>Email address</th>
-                                <th className='px-4 py-2'>Firstname</th>
-                                <th className='px-4 py-2'>Lastname</th>
-                                <th className='px-4 py-2'>Role</th>
-                                <th className='px-4 py-2'>Phone</th>
-                                <th className='px-4 py-2'>Status</th>
-                                <th className='px-4 py-2'>Created At</th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Email address
+                                        <span onClick={() => handleSort('email', 'text')} className='cursor-pointer'>
+                                            {sort.key === 'email' ? (
+                                                sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                                            ) : <FaSortAlphaDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Firstname
+                                        <span onClick={() => handleSort('firstname', 'text')} className='cursor-pointer'>
+                                            {sort.key === 'firstname' ? (
+                                                sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                                            ) : <FaSortAlphaDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Lastname
+                                        <span onClick={() => handleSort('lastname', 'text')} className='cursor-pointer'>
+                                            {sort.key === 'lastname' ? (
+                                                sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                                            ) : <FaSortAlphaDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Role
+                                        <span onClick={() => handleSort('role', 'text')} className='cursor-pointer'>
+                                            {sort.key === 'role' ? (
+                                                sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                                            ) : <FaSortAlphaDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Phone
+                                        <span onClick={() => handleSort('mobile', 'text')} className='cursor-pointer'>
+                                            {sort.key === 'mobile' ? (
+                                                sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                                            ) : <FaSortNumericDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Status
+                                        <span onClick={() => handleSort('isBlocked', 'text')} className='cursor-pointer'>
+                                            {sort.key === 'isBlocked' ? (
+                                                sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                                            ) : <FaSortAlphaDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
+                                <th className='px-4 py-2'>
+                                    <span className='flex items-center gap-1'>
+                                        Created At
+                                        <span onClick={() => handleSort('createdAt', 'date')} className='cursor-pointer'>
+                                            {sort.key === 'createdAt' ? (
+                                                sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                                            ) : <FaSortNumericDown className='opacity-50' />}
+                                        </span>
+                                    </span>
+                                </th>
                                 <th className='px-4 py-2'>Actions</th>
                             </tr>
                         </thead>

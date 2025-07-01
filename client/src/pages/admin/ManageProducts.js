@@ -15,6 +15,7 @@ import Swal from "sweetalert2"
 import { toast } from "react-toastify"
 import { BiEdit, BiCustomize } from "react-icons/bi"
 import { RiDeleteBin6Line } from "react-icons/ri"
+import { FaSortAlphaDown, FaSortAlphaUp, FaSortNumericDown, FaSortNumericUp } from 'react-icons/fa';
 
 const ManageProducts = () => {
   const navigate = useNavigate()
@@ -30,6 +31,7 @@ const ManageProducts = () => {
   const [editProduct, setEditProduct] = useState(null)
   const [update, setUpdate] = useState(false)
   const [customizeVarriant, setCustomizeVarriant] = useState(null)
+  const [sort, setSort] = useState({ key: '', order: '' });
 
   const render = useCallback(() => {
     setUpdate(!update)
@@ -58,10 +60,29 @@ const ManageProducts = () => {
       })
   }, [queryDecounce])
 
+  const handleSort = (key, type) => {
+    setSort(prev => {
+      let newOrder = 'asc';
+      if (prev.key === key) {
+        newOrder = prev.order === 'asc' ? 'desc' : 'asc';
+      }
+      // Cập nhật URL để fetch lại với sort mới
+      const searchParams = Object.fromEntries([...params]);
+      let sortParam = key;
+      if (newOrder === 'desc') sortParam = '-' + key;
+      // Giữ lại các params khác (q, page...)
+      navigate({
+        pathname: location.pathname,
+        search: createSearchParams({ ...searchParams, sort: sortParam }).toString(),
+      });
+      return { key, order: newOrder };
+    });
+  };
+
   useEffect(() => {
-    const searchParams = Object.fromEntries([...params])
-    fetchProducts(searchParams)
-  }, [params, update])
+    const searchParams = Object.fromEntries([...params]);
+    fetchProducts(searchParams);
+  }, [params, update]);
 
   const handleDeleteProduct = (pid) => {
     Swal.fire({
@@ -119,16 +140,106 @@ const ManageProducts = () => {
           <tr className="border bg-sky-900 text-white border-white">
             <th className="text-center py-2">Order</th>
             <th className="text-center py-2">Thumb</th>
-            <th className="text-center py-2">Title</th>
-            <th className="text-center py-2">Brand</th>
-            <th className="text-center py-2">Category</th>
-            <th className="text-center py-2">Price</th>
-            <th className="text-center py-2">Quantity</th>
-            <th className="text-center py-2">Sold</th>
-            <th className="text-center py-2">Color</th>
-            <th className="text-center py-2">Ratings</th>
-            <th className="text-center py-2">Varriants</th>
-            <th className="text-center py-2">UpdatedAt</th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Title
+                <span onClick={() => handleSort('title', 'text')} className="cursor-pointer">
+                  {sort.key === 'title' ? (
+                    sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                  ) : <FaSortAlphaDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Brand
+                <span onClick={() => handleSort('brand', 'text')} className="cursor-pointer">
+                  {sort.key === 'brand' ? (
+                    sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                  ) : <FaSortAlphaDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Category
+                <span onClick={() => handleSort('category', 'text')} className="cursor-pointer">
+                  {sort.key === 'category' ? (
+                    sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                  ) : <FaSortAlphaDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Price
+                <span onClick={() => handleSort('price', 'number')} className="cursor-pointer">
+                  {sort.key === 'price' ? (
+                    sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                  ) : <FaSortNumericDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Quantity
+                <span onClick={() => handleSort('quantity', 'number')} className="cursor-pointer">
+                  {sort.key === 'quantity' ? (
+                    sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                  ) : <FaSortNumericDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Sold
+                <span onClick={() => handleSort('sold', 'number')} className="cursor-pointer">
+                  {sort.key === 'sold' ? (
+                    sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                  ) : <FaSortNumericDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Color
+                <span onClick={() => handleSort('color', 'text')} className="cursor-pointer">
+                  {sort.key === 'color' ? (
+                    sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                  ) : <FaSortAlphaDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Ratings
+                <span onClick={() => handleSort('totalRatings', 'number')} className="cursor-pointer">
+                  {sort.key === 'totalRatings' ? (
+                    sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                  ) : <FaSortNumericDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Varriants
+                <span onClick={() => handleSort('varriants', 'number')} className="cursor-pointer">
+                  {sort.key === 'varriants' ? (
+                    sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                  ) : <FaSortNumericDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
+            <th className="text-center py-2">
+              <span className="flex items-center justify-center gap-1">
+                Created At
+                <span onClick={() => handleSort('createdAt', 'date')} className="cursor-pointer">
+                  {sort.key === 'createdAt' ? (
+                    sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                  ) : <FaSortNumericDown className="opacity-50" />}
+                </span>
+              </span>
+            </th>
             <th className="text-center py-2">Actions</th>
           </tr>
         </thead>

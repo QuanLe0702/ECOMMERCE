@@ -34,48 +34,59 @@ const CreateBlog = () => {
       <div className="p-4 border-b w-full bg-gray-50 justify-between flex items-center fixed top-0">
         <h1 className="text-3xl font-bold tracking-tight">Create Blog</h1>
       </div>
-      <div className="px-4 flex flex-col gap-4">
-        <InputForm
-          id="title"
-          errors={errors}
-          validate={{ required: "This field cannot empty." }}
-          register={register}
-          label="Tựa đề"
-          placeholder="Nhập tựa đề bài viết"
-        />
-        <InputForm
-          id="hashtags"
-          errors={errors}
-          validate={{ required: "This field cannot empty." }}
-          register={register}
-          label="Tags"
-          placeholder="Mỗi tag cách nhau dấu phẩy"
-        />
-        <MdEditor
-          id="description"
-          errors={errors}
-          validate={{ required: "This field cannot empty." }}
-          register={register}
-          label="Nội dung bài viết"
-          height={800}
-          setValue={setValue}
-          value={watch("description")}
-        />
-        <div>
+      <div className="px-4 flex flex-col gap-6">
+        <div className="flex flex-col">
+          <label htmlFor="title" className="font-semibold mb-1">Title</label>
+          <input
+            id="title"
+            className="border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150 text-base"
+            placeholder="Enter blog title"
+            {...register('title', { required: 'Title is required.' })}
+          />
+          {errors['title'] && <small className='text-xs text-red-500 mt-1'>{errors['title']?.message}</small>}
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="hashtags" className="font-semibold mb-1">Tags <span className="font-normal text-gray-500">(comma separated)</span></label>
+          <input
+            id="hashtags"
+            className="border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150 text-base"
+            placeholder="e.g. technology, ai, blog"
+            {...register('hashtags', { required: 'At least one tag is required.' })}
+          />
+          {errors['hashtags'] && <small className='text-xs text-red-500 mt-1'>{errors['hashtags']?.message}</small>}
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="description" className="font-semibold mb-1">Blog Content</label>
+          <MdEditor
+            id="description"
+            errors={errors}
+            validate={{ required: "Content is required." }}
+            register={register}
+            label=""
+            height={400}
+            setValue={setValue}
+            value={watch("description")}
+          />
+          {errors['description'] && <small className='text-xs text-red-500 mt-1'>{errors['description']?.message}</small>}
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="image" className="font-semibold mb-1">Thumbnail Image</label>
           <InputFile
             register={register}
             errors={errors}
             id="image"
-            validate={{ required: "This field cannot empty." }}
-            label="Ảnh đại diện:"
+            validate={{ required: "Thumbnail image is required." }}
+            label=""
           />
+          {errors['image'] && <small className='text-xs text-red-500 mt-1'>{errors['image']?.message}</small>}
         </div>
         <div className="my-6">
           <Button
             disabled={isLoading}
             handleOnClick={handleSubmit(handlePublish)}
+            style="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow transition-all duration-150"
           >
-            Publish
+            Publish Blog
           </Button>
         </div>
       </div>

@@ -290,7 +290,6 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
                 />
                 <span className="flex flex-col">
                   <span>{product?.color}</span>
-                  <span className="text-sm">{product?.price}</span>
                 </span>
               </div>
               {product?.varriants?.map((el) => (
@@ -309,7 +308,6 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
                   />
                   <span className="flex flex-col">
                     <span>{el.color}</span>
-                    <span className="text-sm">{el.price}</span>
                   </span>
                 </div>
               ))}

@@ -13,6 +13,7 @@ import UpdateBlog from "./UpdateBlog"
 import { toast } from "react-toastify"
 import { useSelector } from "react-redux"
 import Swal from "sweetalert2"
+import { FaSortAlphaDown, FaSortAlphaUp, FaSortNumericDown, FaSortNumericUp } from 'react-icons/fa'
 
 const ManageBlog = ({ dispatch }) => {
   const [params] = useSearchParams()
@@ -25,6 +26,11 @@ const ManageBlog = ({ dispatch }) => {
     formState: { errors },
     watch,
   } = useForm()
+  const [sort, setSort] = useState({ key: '', order: '' })
+
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const fetchBlogs = async (param) => {
     const response = await apiGetBlogs({
       ...param,
@@ -42,6 +48,7 @@ const ManageBlog = ({ dispatch }) => {
     if (queryDebounce) searchParams.q = queryDebounce
     if (!isShowModal) fetchBlogs(searchParams)
   }, [params, update, queryDebounce, isShowModal])
+
   const handleDeleteBolg = async (id) => {
     Swal.fire({
       icon: "warning",
@@ -61,6 +68,24 @@ const ManageBlog = ({ dispatch }) => {
       }
     })
   }
+
+  const handleSort = (key, type) => {
+    setSort(prev => {
+      let newOrder = 'asc'
+      if (prev.key === key) {
+        newOrder = prev.order === 'asc' ? 'desc' : 'asc'
+      }
+      const searchParams = Object.fromEntries([...params])
+      let sortParam = key
+      if (newOrder === 'desc') sortParam = '-' + key
+      navigate({
+        pathname: location.pathname,
+        search: new URLSearchParams({ ...searchParams, sort: sortParam }).toString(),
+      })
+      return { key, order: newOrder }
+    })
+  }
+
   return (
     <div className="w-full flex flex-col gap-4 min-h-screen bg-gray-50 relative">
       <div className="h-[69px] w-full"></div>
@@ -83,12 +108,66 @@ const ManageBlog = ({ dispatch }) => {
           <thead>
             <tr className="border bg-sky-900 text-white border-white">
               <th className="text-center py-2">#</th>
-              <th className="text-center py-2">Title</th>
-              <th className="text-center py-2">Hashtags</th>
-              <th className="text-center py-2">Views</th>
-              <th className="text-center py-2">Liked</th>
-              <th className="text-center py-2">Disliked</th>
-              <th className="text-center py-2">Created At</th>
+              <th className="text-center py-2">
+                <span className="flex items-center justify-center gap-1">
+                  Title
+                  <span onClick={() => handleSort('title', 'text')} className="cursor-pointer">
+                    {sort.key === 'title' ? (
+                      sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                    ) : <FaSortAlphaDown className="opacity-50" />}
+                  </span>
+                </span>
+              </th>
+              <th className="text-center py-2">
+                <span className="flex items-center justify-center gap-1">
+                  Hashtags
+                  <span onClick={() => handleSort('hashtags', 'text')} className="cursor-pointer">
+                    {sort.key === 'hashtags' ? (
+                      sort.order === 'asc' ? <FaSortAlphaDown /> : <FaSortAlphaUp />
+                    ) : <FaSortAlphaDown className="opacity-50" />}
+                  </span>
+                </span>
+              </th>
+              <th className="text-center py-2">
+                <span className="flex items-center justify-center gap-1">
+                  Views
+                  <span onClick={() => handleSort('numberViews', 'number')} className="cursor-pointer">
+                    {sort.key === 'numberViews' ? (
+                      sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                    ) : <FaSortNumericDown className="opacity-50" />}
+                  </span>
+                </span>
+              </th>
+              <th className="text-center py-2">
+                <span className="flex items-center justify-center gap-1">
+                  Liked
+                  <span onClick={() => handleSort('likes', 'number')} className="cursor-pointer">
+                    {sort.key === 'likes' ? (
+                      sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                    ) : <FaSortNumericDown className="opacity-50" />}
+                  </span>
+                </span>
+              </th>
+              <th className="text-center py-2">
+                <span className="flex items-center justify-center gap-1">
+                  Disliked
+                  <span onClick={() => handleSort('dislikes', 'number')} className="cursor-pointer">
+                    {sort.key === 'dislikes' ? (
+                      sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                    ) : <FaSortNumericDown className="opacity-50" />}
+                  </span>
+                </span>
+              </th>
+              <th className="text-center py-2">
+                <span className="flex items-center justify-center gap-1">
+                  Created At
+                  <span onClick={() => handleSort('createdAt', 'date')} className="cursor-pointer">
+                    {sort.key === 'createdAt' ? (
+                      sort.order === 'asc' ? <FaSortNumericDown /> : <FaSortNumericUp />
+                    ) : <FaSortNumericDown className="opacity-50" />}
+                  </span>
+                </span>
+              </th>
               <th className="text-center py-2">Actions</th>
             </tr>
           </thead>

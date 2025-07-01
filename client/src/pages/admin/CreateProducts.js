@@ -25,6 +25,17 @@ const CreateProducts = () => {
         setPayload(e)
     }, [payload])
     const [hoverElm, setHoverElm] = useState(null)
+    const [newCategory, setNewCategory] = useState('');
+    const [newBrand, setNewBrand] = useState('');
+    const [categoryInput, setCategoryInput] = useState('');
+    const [brandInput, setBrandInput] = useState('');
+    const [showCategorySuggest, setShowCategorySuggest] = useState(false);
+    const [showBrandSuggest, setShowBrandSuggest] = useState(false);
+
+    const categoryList = categories?.map(el => el.title) || [];
+    const selectedCategory = categories?.find(el => el.title === categoryInput);
+    const brandList = selectedCategory?.brand || [];
+
     const handlePreviewThumb = async (file) => {
         const base64Thumb = await getBase64(file)
         setPreview(prev => ({ ...prev, thumb: base64Thumb }))
@@ -52,7 +63,16 @@ const CreateProducts = () => {
     const handleCreateProduct = async (data) => {
         const invalids = validate(payload, setInvalidFields)
         if (invalids === 0) {
-            if (data.category) data.category = categories?.find(el => el._id === data.category)?.title
+            if (categoryList.includes(categoryInput)) {
+                data.category = categoryInput;
+            } else {
+                data.category = categoryInput;
+            }
+            if (brandInput && brandList.includes(brandInput)) {
+                data.brand = brandInput;
+            } else if (brandInput) {
+                data.brand = brandInput;
+            }
             const finalPayload = { ...data, ...payload }
             const formData = new FormData()
             for (let i of Object.entries(finalPayload)) formData.append(i[0], i[1])
@@ -70,6 +90,8 @@ const CreateProducts = () => {
                     thumb: '',
                     image: []
                 })
+                setCategoryInput('');
+                setBrandInput('');
             } else toast.error(response.mes)
         }
     }
@@ -80,74 +102,124 @@ const CreateProducts = () => {
             </h1>
             <div className='p-4'>
                 <form onSubmit={handleSubmit(handleCreateProduct)}>
-                    <InputForm
-                        label='Name product'
-                        register={register}
-                        errors={errors}
-                        id='title'
-                        validate={{
-                            required: 'Need fill this field'
-                        }}
-                        fullWidth
-                        placeholder='Name of new product'
-                    />
-                    <div className='w-full my-6 flex gap-4'>
-                        <InputForm
-                            label='Price'
-                            register={register}
-                            errors={errors}
-                            id='price'
-                            validate={{
-                                required: 'Need fill this field'
-                            }}
-                            style='flex-auto'
-                            placeholder='Price of new product'
-                            type='number'
+                    <div className='flex flex-col mb-6'>
+                        <label className='font-semibold mb-1' htmlFor='title'>Product name:</label>
+                        <input
+                            id='title'
+                            className='border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150'
+                            placeholder='Enter product name'
+                            {...register('title', { required: 'This field is required' })}
                         />
-                        <InputForm
-                            label='Quantity'
-                            register={register}
-                            errors={errors}
-                            id='quantity'
-                            validate={{
-                                required: 'Need fill this field'
-                            }}
-                            style='flex-auto'
-                            placeholder='Quantity of new product'
-                            type='number'
-                        />
-                        <InputForm
-                            label='Color'
-                            register={register}
-                            errors={errors}
-                            id='color'
-                            validate={{
-                                required: 'Need fill this field'
-                            }}
-                            style='flex-auto'
-                            placeholder='color of new product'
-                        />
+                        {errors['title'] && <small className='text-xs text-red-500'>{errors['title']?.message}</small>}
                     </div>
                     <div className='w-full my-6 flex gap-4'>
-                        <Select
-                            label='Category'
-                            options={categories?.map(el => ({ code: el._id, value: el.title }))}
-                            register={register}
-                            id='category'
-                            validate={{ required: 'Need fill this field' }}
-                            style='flex-auto'
-                            errors={errors}
-                            fullWidth
-                        />
-                        <Select
-                            label='Brand (Optional)'
-                            options={categories?.find(el => el._id === watch('category'))?.brand?.map(el => ({ code: el, value: el }))}
-                            register={register}
-                            id='brand'
-                            style='flex-auto'
-                            errors={errors}
-                            fullWidth
-                        />
+                        <div className='flex flex-col flex-auto'>
+                            <label className='font-semibold mb-1' htmlFor='price'>Price:</label>
+                            <input
+                                id='price'
+                                className='border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150'
+                                placeholder='Enter product price'
+                                type='number'
+                                {...register('price', { required: 'This field is required' })}
+                            />
+                            {errors['price'] && <small className='text-xs text-red-500'>{errors['price']?.message}</small>}
+                        </div>
+                        <div className='flex flex-col flex-auto'>
+                            <label className='font-semibold mb-1' htmlFor='quantity'>Quantity:</label>
+                            <input
+                                id='quantity'
+                                className='border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150'
+                                placeholder='Enter product quantity'
+                                type='number'
+                                {...register('quantity', { required: 'This field is required' })}
+                            />
+                            {errors['quantity'] && <small className='text-xs text-red-500'>{errors['quantity']?.message}</small>}
+                        </div>
+                        <div className='flex flex-col flex-auto'>
+                            <label className='font-semibold mb-1' htmlFor='color'>Color:</label>
+                            <input
+                                id='color'
+                                className='border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150'
+                                placeholder='Enter product color'
+                                {...register('color', { required: 'This field is required' })}
+                            />
+                            {errors['color'] && <small className='text-xs text-red-500'>{errors['color']?.message}</small>}
+                        </div>
+                    </div>
+                    <div className='w-full my-6 flex gap-4'>
+                        <div className='flex flex-col flex-auto relative'>
+                            <label className='font-semibold mb-1'>Category</label>
+                            <input
+                                className='border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150'
+                                type='text'
+                                placeholder='Select or enter category'
+                                value={categoryInput}
+                                onChange={e => {
+                                    setCategoryInput(e.target.value);
+                                    setShowCategorySuggest(true);
+                                }}
+                                onFocus={() => setShowCategorySuggest(true)}
+                                onBlur={() => setTimeout(() => setShowCategorySuggest(false), 100)}
+                                autoComplete='off'
+                                name='categoryInput'
+                            />
+                            {showCategorySuggest && (
+                                <div className='absolute top-full left-0 right-0 bg-white border border-blue-400 shadow-lg z-20 max-h-52 overflow-y-auto rounded mt-1 transition-all duration-150'>
+                                    {(categoryInput ? categoryList.filter(item => item.toLowerCase().includes(categoryInput.toLowerCase())) : categoryList).map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            className='p-3 hover:bg-blue-100 cursor-pointer transition-all duration-100 text-base'
+                                            onMouseDown={() => {
+                                                setCategoryInput(item);
+                                                setShowCategorySuggest(false);
+                                            }}
+                                        >
+                                            {item}
+                                        </div>
+                                    ))}
+                                    {(categoryInput && categoryList.filter(item => item.toLowerCase().includes(categoryInput.toLowerCase())).length === 0) && (
+                                        <div className='p-3 text-gray-400 text-base'>No result, will create new</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className='flex flex-col flex-auto relative'>
+                            <label className='font-semibold mb-1'>Brand (Optional)</label>
+                            <input
+                                className='border p-2 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-150'
+                                type='text'
+                                placeholder='Select or enter brand'
+                                value={brandInput}
+                                onChange={e => {
+                                    setBrandInput(e.target.value);
+                                    setShowBrandSuggest(true);
+                                }}
+                                onFocus={() => setShowBrandSuggest(true)}
+                                onBlur={() => setTimeout(() => setShowBrandSuggest(false), 100)}
+                                autoComplete='off'
+                                name='brandInput'
+                                disabled={!categoryInput}
+                            />
+                            {showBrandSuggest && (
+                                <div className='absolute top-full left-0 right-0 bg-white border border-blue-400 shadow-lg z-20 max-h-52 overflow-y-auto rounded mt-1 transition-all duration-150'>
+                                    {(brandInput ? brandList.filter(item => item.toLowerCase().includes(brandInput.toLowerCase())) : brandList).map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            className='p-3 hover:bg-blue-100 cursor-pointer transition-all duration-100 text-base'
+                                            onMouseDown={() => {
+                                                setBrandInput(item);
+                                                setShowBrandSuggest(false);
+                                            }}
+                                        >
+                                            {item}
+                                        </div>
+                                    ))}
+                                    {(brandInput && brandList.filter(item => item.toLowerCase().includes(brandInput.toLowerCase())).length === 0) && (
+                                        <div className='p-3 text-gray-400 text-base'>No result, will create new</div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <MarkdownEditor
                         name='description'
@@ -157,11 +229,11 @@ const CreateProducts = () => {
                         setInvalidFields={setInvalidFields}
                     />
                     <div className='flex flex-col gap-2 mt-8'>
-                        <label className='font-semibold' htmlFor="thumb">Upload thumb</label>
+                        <label className='font-semibold' htmlFor="thumb">Upload thumbnail</label>
                         <input
                             type="file"
                             id="thumb"
-                            {...register('thumb', { required: 'Need fill' })}
+                            {...register('thumb', { required: 'This field is required' })}
                         />
                         {errors['thumb'] && <small className='text-xs text-red-500'>{errors['thumb']?.message}</small>}
                     </div>
@@ -169,12 +241,12 @@ const CreateProducts = () => {
                         <img src={preview.thumb} alt="thumbnail" className='w-[200px] object-contain' />
                     </div>}
                     <div className='flex flex-col gap-2 mt-8'>
-                        <label className='font-semibold' htmlFor="products">Upload images of product</label>
+                        <label className='font-semibold' htmlFor="products">Upload product images</label>
                         <input
                             type="file"
                             id="products"
                             multiple
-                            {...register('images', { required: 'Need fill' })}
+                            {...register('images', { required: 'This field is required' })}
                         />
                         {errors['images'] && <small className='text-xs text-red-500'>{errors['images']?.message}</small>}
                     </div>
