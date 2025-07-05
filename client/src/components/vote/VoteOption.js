@@ -11,7 +11,9 @@ const VoteOption = ({ nameProduct, handleSubmitVoteOption }) => {
     const [score, setScore] = useState(null)
 
     useEffect(() => {
-        modalRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        if (modalRef.current) {
+            modalRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        }
     }, [])
     return (
         <div onClick={e => e.stopPropagation()} ref={modalRef} className='bg-white w-[700px] p-4 flex-col gap-4 flex items-center justify-center'>

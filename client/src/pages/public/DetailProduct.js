@@ -93,7 +93,9 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
       fetchProductData()
       fetchProducts()
     }
-    titleRef.current.scrollIntoView({ block: "center" })
+    if (titleRef.current) {
+      titleRef.current.scrollIntoView({ block: "center" })
+    }
   }, [pid])
   useEffect(() => {
     if (pid) fetchProductData()
@@ -189,16 +191,16 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
       <div
         onClick={(e) => e.stopPropagation()}
         className={clsx(
-          "bg-white m-auto mt-4 flex",
+          "bg-white m-auto mt-4 flex rounded-xl shadow-2xl",
           isQuickView
-            ? "max-w-[900px] gap-16 p-8 max-h-[80vh] overflow-y-auto"
+            ? "max-w-[900px] gap-10 p-8 max-h-[80vh] overflow-y-auto"
             : "w-main"
         )}
       >
         <div
           className={clsx("flex flex-col gap-4 w-2/5", isQuickView && "w-1/2")}
         >
-          <div className="w-[458px] h-[458px] border flex items-center overflow-hidden">
+          <div className="w-[350px] h-[350px] border rounded-lg shadow-md flex items-center justify-center overflow-hidden bg-gray-50">
             <ReactImageMagnify
               {...{
                 smallImage: {
@@ -214,9 +216,9 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
               }}
             />
           </div>
-          <div className="w-[458px]">
+          <div className="w-[350px] mt-4">
             <Slider
-              className="image-slider flex gap-2 justify-between"
+              className="image-slider flex gap-3 justify-between"
               {...settings}
             >
               {currentProduct.images?.length === 0 &&
@@ -226,7 +228,10 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
                       onClick={(e) => handleClickImage(e, el)}
                       src={el}
                       alt="sub-product"
-                      className="w-[143px] cursor-pointer h-[143px] border object-cover"
+                      className={clsx(
+                        "w-[90px] h-[90px] object-cover rounded-md border cursor-pointer transition-all duration-200",
+                        currentImage === el ? "border-main ring-2 ring-main" : "border-gray-200"
+                      )}
                     />
                   </div>
                 ))}
@@ -237,7 +242,10 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
                       onClick={(e) => handleClickImage(e, el)}
                       src={el}
                       alt="sub-product"
-                      className="w-[143px] cursor-pointer h-[143px] border object-cover"
+                      className={clsx(
+                        "w-[90px] h-[90px] object-cover rounded-md border cursor-pointer transition-all duration-200",
+                        currentImage === el ? "border-main ring-2 ring-main" : "border-gray-200"
+                      )}
                     />
                   </div>
                 ))}
@@ -251,10 +259,10 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
           )}
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-[30px] font-semibold">{`${formatMoney(
+            <h2 className="text-[30px] font-bold text-main">{`${formatMoney(
               fotmatPrice(currentProduct.price || product?.price)
             )} VNĐ`}</h2>
-            <span className="text-sm text-main">{`In stock: ${product?.quantity}`}</span>
+            <span className="text-sm text-red-500 font-semibold">{`In stock: ${product?.quantity}`}</span>
           </div>
           <div className="flex items-center gap-1">
             {renderStarFromNumber(product?.totalRatings)?.map((el, index) => (
@@ -284,8 +292,8 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
               <div
                 onClick={() => setVarriant(null)}
                 className={clsx(
-                  "flex items-center gap-2 p-2 border cursor-pointer",
-                  !varriant && "border-red-500"
+                  "flex items-center gap-2 p-2 border cursor-pointer rounded-md transition-all",
+                  !varriant ? "border-main ring-2 ring-main" : "border-gray-200"
                 )}
               >
                 <img
@@ -302,8 +310,8 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
                   key={el.sku}
                   onClick={() => setVarriant(el.sku)}
                   className={clsx(
-                    "flex items-center gap-2 p-2 border cursor-pointer",
-                    varriant === el.sku && "border-red-500"
+                    "flex items-center gap-2 p-2 border cursor-pointer rounded-md transition-all",
+                    varriant === el.sku ? "border-main ring-2 ring-main" : "border-gray-200"
                   )}
                 >
                   <img
@@ -328,9 +336,12 @@ const DetailProduct = ({ isQuickView, data, location, dispatch, navigate }) => {
                 maxQuantity={product?.quantity}
               />
             </div>
-            <Button handleOnClick={handleAddToCart} fw>
+            <button
+              onClick={handleAddToCart}
+              className="w-full py-3 mt-6 bg-main text-white rounded-lg text-lg font-semibold shadow hover:bg-red-600 transition-all"
+            >
               Add to Cart
-            </Button>
+            </button>
           </div>
         </div>
         {!isQuickView && (
