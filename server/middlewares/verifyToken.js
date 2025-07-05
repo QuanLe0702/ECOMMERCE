@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
+const User = require('../models/user')
 
 const verifyAccessToken = asyncHandler(async (req, res, next) => {
     // Bearer token
@@ -21,6 +22,7 @@ const verifyAccessToken = asyncHandler(async (req, res, next) => {
         })
     }
 })
+
 const isAdmin = asyncHandler((req, res, next) => {
     const { role } = req.user
     if (+role !== 1945)
@@ -31,7 +33,20 @@ const isAdmin = asyncHandler((req, res, next) => {
     next()
 })
 
+const isNotBlocked = asyncHandler(async (req, res, next) => {
+    const { _id } = req.user
+    const user = await User.findById(_id)
+    if (user && user.isBlocked) {
+        return res.status(403).json({
+            success: false,
+            mes: 'Your account has been blocked. Please contact administrator.'
+        })
+    }
+    next()
+})
+
 module.exports = {
     verifyAccessToken,
-    isAdmin
+    isAdmin,
+    isNotBlocked
 }

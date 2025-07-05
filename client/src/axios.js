@@ -1,4 +1,7 @@
 import axios from 'axios'
+import { logout } from './store/user/userSlice'
+import { store } from './store/redux'
+
 const instance = axios.create({
     baseURL: process.env.REACT_APP_API_URI,
 });
@@ -26,6 +29,12 @@ instance.interceptors.response.use(function (response) {
 }, function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
+    
+    // Xử lý trường hợp user bị block (403 Forbidden)
+    if (error.response?.status === 403 && error.response?.data?.mes?.includes('blocked')) {
+        store.dispatch(logout())
+    }
+    
     return error.response.data;
 });
 

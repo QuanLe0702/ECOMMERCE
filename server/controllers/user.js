@@ -95,6 +95,13 @@ const login = asyncHandler(async (req, res) => {
   // plain object
   const response = await User.findOne({ email })
   if (response && (await response.isCorrectPassword(password))) {
+    // Kiểm tra xem user có bị block hay không
+    if (response.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        mes: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+      })
+    }
     // Tách password và role ra khỏi response
     const { password, role, refreshToken, ...userData } = response.toObject()
     // Tạo access token

@@ -70,6 +70,20 @@ const ManageUser = () => {
         }
         fetchUsers(searchParams)
     }, [queriesDebounce, params, update, navigate, location])
+
+    useEffect(() => {
+        if (editElm) {
+            reset({
+                email: editElm.email,
+                firstname: editElm.firstname,
+                lastname: editElm.lastname,
+                role: editElm.role,
+                mobile: editElm.mobile,
+                isBlocked: editElm.isBlocked,
+            });
+        }
+    }, [editElm, reset]);
+
     const handleUpdate = async (data) => {
         const response = await apiUpdateUser(data, editElm._id)
         if (response.success) {
