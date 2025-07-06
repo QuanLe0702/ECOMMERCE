@@ -2,7 +2,7 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . .
 # Nhận các biến môi trường từ build args
 ARG REACT_APP_API_URI
