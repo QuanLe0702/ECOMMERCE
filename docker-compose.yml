@@ -7,12 +7,23 @@ services:
       context: ./server
       dockerfile: Dockerfile
     container_name: ecommerce_server
-    # Không expose port ra ngoài host, Nginx sẽ truy cập qua mạng nội bộ của Docker
     expose:
       - '5000'
-    env_file:
-      - ./server/.env # Bạn sẽ cần tạo file này trên EC2
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb+srv://quanle0702:Quanle0702@cluster0.6kjbbjy.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0
+      - JWT_SECRET=klfajskdfjaslkdfj
+      - EMAIL_APP_PASSWORD=bwryjkavodscewp
+      - EMAIL_NAME=quanle0702@gmail.com
+      - URL_SERVER=http://52.62.205.58:5000
+      - LIMIT_PRODUCTS=12
+      - CLOUDINARY_NAME=dgasrzbtf
+      - CLOUDINARY_KEY=87343153367242
+      - CLOUDINARY_SECRET=8fRwYDOm_P9__YEWJ5XAKhUODIU
+      - CLIENT_URL=http://52.62.205.58:3000
     restart: unless-stopped
+    depends_on:
+      - mongo
 
   # Dịch vụ Frontend
   client:
@@ -20,9 +31,10 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        # Client sẽ gửi request tới /api, và Nginx sẽ xử lý
-        REACT_APP_API_URI: /api
-        REACT_APP_LIMIT: 10
+        REACT_APP_API_URI: http://52.62.205.58:5000/api
+        REACT_APP_LIMIT: 12
+        REACT_APP_MCETINY: x966ukew6wwp2d1iu8f41xmjei8omtxk49m356em9qoizc
+        REACT_APP_URL: http://52.62.205.58:3000
     container_name: ecommerce_client
     expose:
       - '80'
@@ -30,15 +42,29 @@ services:
     depends_on:
       - server
 
+  # Dịch vụ MongoDB
+  mongo:
+    image: mongo:latest
+    container_name: ecommerce_mongo
+    environment:
+      - MONGO_INITDB_DATABASE=ecommerce
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
   # Dịch vụ Reverse Proxy
   nginx-proxy:
     image: nginx:stable-alpine
     container_name: ecommerce_nginx
     ports:
-      - "80:80" # Mở port 80 của host để nhận traffic từ bên ngoài
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - client
       - server
-    restart: unless-stopped 
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  mongo_data: 
